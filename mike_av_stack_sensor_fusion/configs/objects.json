@@ -1,0 +1,10 @@
+{
+    "objects":
+        [
+            {
+                "type": "<VEHICLE-TYPE>",
+                "id": "<VEHICLE-NAME>",
+                "spawn_point": {"x":65.516594, "y":7.808423, "z":0.275307, "roll": 0.0, "pitch": 0.0, "yaw": 0.855823}
+            }
+        ]
+    }

@@ -1,0 +1,14 @@
+{
+    "arch":"darknet",
+    "pretrained_filename":"complex_yolov4_mse_loss.pth",
+    "cfgfile":"config/complex_yolov4.cfg",
+    "batch_size":4,
+    "conf_thresh":0.5,
+    "num_classes":3,
+    "distributed":false,
+    "img_size":608,
+    "nms_thresh":0.4,
+    "num_workers":4,
+    "pin_memory":true,
+    "use_giou_loss":false
+}

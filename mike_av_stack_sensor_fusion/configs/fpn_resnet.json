@@ -1,0 +1,36 @@
+{
+    "arch":"fpn_resnet",
+    "pretrained_filename":"fpn_resnet_18_epoch_300.pth",
+    "imagenet_pretrained":true,
+    "num_layers":18,
+    "batch_size":4,
+    "K":50,
+    "conf_thresh":0.5,
+    "peak_thresh":0.2,
+    "distributed":true,
+    "img_size":608,
+    "nms_thresh":0.4,
+    "num_workers":1,
+    "pin_memory":true,
+
+    "input_size":[608, 608],
+    "hm_size":[152, 152],
+    "down_ratio":4,
+    "max_objects":50,
+
+    "head_conv":64,
+    "num_classes":3,
+    "num_center_offset":2,
+    "num_z":1,
+    "num_dim":3,
+    "num_direction":2,
+
+    "heads":{
+        "hm_cen":3,
+        "cen_offset":2,
+        "direction":2,
+        "z_coor":1,
+        "dim":3
+    },
+    "num_input_features":4
+}
