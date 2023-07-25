@@ -22,9 +22,9 @@ from sensor_msgs.msg import Image, PointCloud2
 from vision_msgs.msg import BoundingBox3D, ObjectHypothesisWithPose, Detection3D, Detection3DArray, Detection2D, Detection2DArray
 from geometry_msgs.msg import Pose, Point, Vector3, Quaternion
 # from tf.transformations import quaternion_from_euler, euler_from_quaternion
-import detection.objdet_pcl as pcl
-import detection.objdet_detect as odet
-from detection.objdet_models.yolov7.yolov7 import Yolov7
+from ..detection import objdet_pcl as pcl
+from ..detection import objdet_detect as odet
+# from ..detection.objdet_models.yolov7.yolov7 import Yolov7
 import numpy as np
 import time
 from tracking.trackmanagement import Measurement, LidarMeasurement, CameraMeasurement
@@ -209,10 +209,10 @@ class Camera(Sensor):
         super().__init__(name, configs, trackmanager)
 
         # Add yolo configs
-        with open(os.path.join(dir_sf, 'configs', 'yolov7.json')) as j_object:
-            configs.yolov7 = json.load(j_object)
+        # with open(os.path.join(dir_sf, 'configs', 'yolov7.json')) as j_object:
+        #     configs.yolov7 = json.load(j_object)
 
-        self.init_yolo()
+        # self.init_yolo()
         self.subscription_det = self.create_subscription(
             Image,
             self.configs.base_topic,
@@ -243,13 +243,14 @@ class Camera(Sensor):
             10
             )
         
-    def init_yolo(self):
-        self.get_logger().info(f'Initializing Yolov7, cv version: {cv2.__version__}')
-        self.yolo = Yolov7(self.configs.yolov7)
+    # def init_yolo(self):
+    #     self.get_logger().info(f'Initializing Yolov7, cv version: {cv2.__version__}')
+    #     self.yolo = Yolov7(self.configs.yolov7)
 
 
     def detection_callback(self, image):
-        self.yolo.detect(image)
+        # self.yolo.detect(image)
+        print("detection")
 
     def track_manage_callback(self, detection2DArray):        
         meas_list = []
