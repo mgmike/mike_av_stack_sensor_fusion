@@ -15,6 +15,9 @@
 import numpy as np
 import rclpy
 from rclpy.node import Node
+from rclpy.executors import MultiThreadedExecutor
+from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 
 
 from std_msgs.msg import Header
@@ -36,7 +39,7 @@ dir_sf = os.path.dirname(dir_tracking)
 dir_scripts = os.path.dirname(dir_sf)
 sys.path.append(dir_scripts)
 from tools.ros_conversions.transformations import quaternion_from_euler
-import ros_numpy
+from ros2_numpy.ros2_numpy.point_cloud2 import pointcloud2_to_array
 import cv2
 import json
 
@@ -90,16 +93,26 @@ class Lidar(Sensor):
             )
 
         # Set up ros subscribers
+        sub_cb_group = ReentrantCallbackGroup()
+        qos_profile = QoSProfile(
+            reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
+            history=QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+            depth=1
+        )
         self.subscriber_pc = self.create_subscription(
-            PointCloud2,
-            "/carla/ego_vehicle/lidar/lidar1/point_cloud_full", 
-            self.detection_callback
+            msg_type=PointCloud2,
+            topic="/carla/ego_vehicle/lidar/lidar1/point_cloud_full", 
+            callback=self.detection_callback,
+            qos_profile=qos_profile,
+            callback_group=sub_cb_group
             )
         self.subscriber_det = self.create_subscription(
-            Detection3DArray,
-            "/sensor_fusion/detection/lidar/",
-            self.track_manage_callback
-        )
+            msg_type=Detection3DArray,
+            topic="/sensor_fusion/detection/lidar/", 
+            callback=self.track_manage_callback,
+            qos_profile=qos_profile,
+            callback_group=sub_cb_group
+            )
         self.subscriber_pc
         self.subscriber_det
         
@@ -141,7 +154,7 @@ class Lidar(Sensor):
         field_len = len(pointcloud.data)
 
         # The result of this is <vector<vector>> where [[]]
-        point_cloud_2d = np.array([np.array(x.tolist()) for x in ros_numpy.point_cloud2.pointcloud2_to_array(pointcloud)])
+        point_cloud_2d = np.array([np.array(x.tolist()) for x in pointcloud2_to_array(pointcloud)])
     
         if self.verbose:
             print("Shape of pc2d: ", point_cloud_2d.shape, " First element: ", type(point_cloud_2d[0]), point_cloud_2d[0])
@@ -213,11 +226,20 @@ class Camera(Sensor):
         #     configs.yolov7 = json.load(j_object)
 
         # self.init_yolo()
-        self.subscription_det = self.create_subscription(
-            Image,
-            self.configs.base_topic,
-            self.detection_callback
+
+        sub_cb_group = ReentrantCallbackGroup()
+        qos_profile = QoSProfile(
+            reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
+            history=QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+            depth=1
         )
+        self.subscription_det = self.create_subscription(
+            msg_type=PointCloud2,
+            topic="/carla/ego_vehicle/lidar/lidar1", 
+            callback=self.detection_callback,
+            qos_profile=qos_profile,
+            callback_group=sub_cb_group
+            )
         self.subscription_det
 
         self.configs.fov = [-0.35, 0.35] # angle of field of view in radians, inaccurate boundary region was removed

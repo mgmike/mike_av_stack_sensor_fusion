@@ -5,6 +5,8 @@ from glob import glob
 package_name = 'mike_av_stack_sensor_fusion'
 tracking = 'mike_av_stack_sensor_fusion/tracking'
 detection = 'mike_av_stack_sensor_fusion/detection'
+tools = 'mike_av_stack_sensor_fusion/tools/ros_conversions'
+ros2_numpy = 'mike_av_stack_sensor_fusion/ros2_numpy/ros2_numpy'
 fpn_resnet_models = 'mike_av_stack_sensor_fusion/detection/objdet_models/fpn_resnet/models'
 fpn_resnet_utils = 'mike_av_stack_sensor_fusion/detection/objdet_models/fpn_resnet/utils'
 fpn_resnet_pretrained = 'mike_av_stack_sensor_fusion/detection/objdet_models/fpn_resnet/pretrained'
@@ -15,6 +17,8 @@ setup(
     packages=[package_name, 
               tracking, 
               detection, 
+              tools,
+              ros2_numpy,
               fpn_resnet_models, 
               fpn_resnet_utils, 
               fpn_resnet_pretrained],

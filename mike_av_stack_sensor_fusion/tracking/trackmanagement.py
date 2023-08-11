@@ -14,7 +14,9 @@
 import numpy as np
 import threading
 import collections
-import rospy
+import rclpy
+from rclpy.node import Node
+from rclpy.duration import Duration
 import json
 from easydict import EasyDict as edict
 
@@ -44,6 +46,7 @@ class Track:
     '''Track class with state, covariance, id, score'''
     def __init__(self, meas, id, params):
         self.params = params
+        self.node = params.node
         print('creating track no.', id)
         M_rot = meas.sensor.sens_to_veh[0:3, 0:3] # rotation matrix from sensor to vehicle coordinates
         
@@ -91,7 +94,7 @@ class Track:
 
         # Initialize empty list of predictions
         # The 0th element will be the most recent updated measurement
-        self.predictions = [Prediction(rospy.Time.now(), x, P)]
+        self.predictions = [Prediction(self.node.get_clock().now().to_msg(), x, P)]
                
         # other track attributes
         self.id = id
@@ -107,15 +110,15 @@ class Track:
     def get_nearest_prediction(self, meas):
         stamp = meas.stamp
         if stamp < self.predictions[0].stamp:
-            rospy.logwarn('Comparing predictions with old measurement')
+            self.node.get_logger().warn('Comparing predictions with old measurement')
             return self.predictions[0]
         elif stamp > self.predictions[self.params.predictions]:
-            rospy.logwarn('Predictions are outdated')
+            self.node.get_logger().warn('Predictions are outdated')
             return self.predictions[self.params.predictions]
         else :
             for i, prediction in enumerate(self.predictions[1:]):
-                if np.abs(meas.stamp - prediction.stamp) < rospy.Duration(0, self.params.dt / 2.0):
-                    rospy.loginfo('Nearest prediction is ', i, ' in the future at time: ', prediction.stamp)
+                if np.abs(meas.stamp - prediction.stamp) < Duration(0, self.params.dt / 2.0):
+                    self.node.get_logger().info('Nearest prediction is ', i, ' in the future at time: ', prediction.stamp)
                     return prediction
                 
     def get_new_prediction(self, stamp, x, P):
@@ -135,15 +138,17 @@ class Track:
         
 ###################        
 
-class Trackmanagement:
+class Trackmanagement(Node):
     '''Track manager with logic for initializing and deleting objects'''
     def __init__(self):
+        super().__init__('trackmanagement')
         self.N = 0 # current number of tracks
         self.last_id = -1
         self.track_list = []
         self.track_list_lock = threading.Lock()
 
         self.params = edict()
+        self.params.node = self
         with open(os.path.join(dir_sf, 'configs', 'tracking.json')) as j_object:
             self.params.update(json.load(j_object))
         

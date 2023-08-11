@@ -16,7 +16,8 @@ import numpy as np
 # add project directory to python path to enable relative imports
 import os
 import sys
-import rospy
+import rclpy
+from rclpy.duration import Duration 
 
 dir_tracking = os.path.dirname(os.path.realpath(__file__))
 dir_sf = os.path.dirname(dir_tracking)
@@ -28,6 +29,7 @@ class Filter:
     '''Kalman filter class'''
     def __init__(self, params):
         self.params = params
+        self.node = params.node
         pass
 
     def F(self, dt):
@@ -54,14 +56,14 @@ class Filter:
 
     def predict(self, track, current_pos):
         # Predict state x and estimation error covariance P to next timestep, save x and P in track
-        time = rospy.Time.now()
+        time = self.node.get_clock().now().to_msg()
         predictions = []
         for i in range(track.params.predictions + 1):
             dt = i * track.params.dt
             F = self.F(dt)
             x = F * current_pos.x
             P = F * current_pos.P * F.transpose() + self.Q(dt)
-            predictions.append(track.get_new_prediction(time + rospy.Duration(0, dt), x, P))
+            predictions.append(track.get_new_prediction(time + Duration(0, dt), x, P))
         track.set_predictions(predictions)
 
     def update(self, track, meas):
