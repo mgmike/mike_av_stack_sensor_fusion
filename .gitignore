@@ -1,0 +1,8 @@
+log/
+*.pth
+*.pt
+.vscode/
+.devcontainer/
+cache/
+build/
+install/
