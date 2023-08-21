@@ -39,7 +39,7 @@ COPY  . .
 
 RUN echo "ls -la"
 
-RUN sudo apt-get install -y ros-foxy-vision-msgs python3-opencv
+RUN sudo apt-get install -y ros-foxy-vision-msgs ros-foxy-derived-object-msgs python3-opencv
 # RUN pip install -r requirements.txt
 # RUN pip3 install open3d>=0.17.0
 

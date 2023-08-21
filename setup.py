@@ -27,6 +27,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'configs'), glob('mike_av_stack_sensor_fusion/configs/*.json')),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

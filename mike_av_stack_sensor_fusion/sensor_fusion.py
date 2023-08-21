@@ -48,12 +48,12 @@ def get_sensor(sensor, trackmanager, executor):
     name = sensor.type.split('.')[1]
     name = sensor.type.split('.')[2] if 'other' in name else name
     result = None
-    # if name == 'lidar':
-    #     result = Lidar(name, sensor, trackmanager)
-    #     executor.add_node(result)
-    # elif name == 'camera':
-    #     result = Camera(name, sensor, trackmanager)
-    #     executor.add_node(result)
+    if name == 'lidar':
+        result = Lidar(name, sensor, trackmanager)
+        executor.add_node(result)
+    elif name == 'camera':
+        result = Camera(name, sensor, trackmanager)
+        executor.add_node(result)
     return result
 
 def main(args=None):
@@ -81,22 +81,20 @@ def main(args=None):
     # sensors = {sensor.id : get_sensor(sensor, trackmanager, executor=executor) for sensor in sensors_j.sensors}
 
     node1 = SFTest()
-    node2 = SFTest()
 
     executor.add_node(node1)
-    executor.add_node(node2)
 
     # spin() simply keeps python from exiting until this node is stopped
-    executor_thread = threading.Thread(target=executor.spin, daemon=True)
-    executor_thread.start()
-    # try:
-    #     while rclpy.ok():
-    #         print('Help me body, you are my only hope')
-    #         rate.sleep()
-    # except KeyboardInterrupt:
-    #     pass
-    # rclpy.shutdown()
-    # executor_thread.join()
+    # executor_thread = threading.Thread(target=executor.spin, daemon=True)
+    # executor_thread.start()
+    
+    try:
+        node1.get_logger().info('Beginning client, shut down with CTRL-C')
+        executor.spin()
+    except KeyboardInterrupt:
+        node1.get_logger().info('Keyboard interrupt, shutting down.\n')
+    node1.destroy_node()
+    rclpy.shutdown()
 
     
 if __name__ == '__main__':

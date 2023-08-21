@@ -13,6 +13,7 @@ Commands:
 
 pip install -r requirements.txt
 pip3 install open3d>=0.17.0
+<!-- pip3 install carla==0.9.13 -->
 
 source /opt/ros/foxy/setup.bash
 colcon build --packages-select mike_av_stack_sensor_fusion
