@@ -24,24 +24,13 @@ ENV SHELL /bin/bash
 WORKDIR /home/ws_av_sf/src/mike_av_stack_sensor_fusion/
 COPY  . .
 
-# COPY requirements.txt /tmp/
-
-# Install requirements
-# RUN pip install easydict
-# RUN pip install torchvision
-# RUN pip install opencv-python
-# RUN pip install open3d
-
-
-
 # [Optional] Set the default user. Omit if you want to keep the default as root.
 # USER $USERNAME
 
-RUN echo "ls -la"
-
 RUN sudo apt-get install -y ros-foxy-vision-msgs ros-foxy-derived-object-msgs python3-opencv
-# RUN pip install -r requirements.txt
-# RUN pip3 install open3d>=0.17.0
+RUN pip install -r requirements.txt
+
+WORKDIR /home/ws_av_sf/
 
 CMD ["/bin/bash"]
 

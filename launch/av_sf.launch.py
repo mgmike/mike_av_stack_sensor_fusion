@@ -56,23 +56,17 @@ def generate_launch_description():
     carla_spawn_objects = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('carla_spawn_objects')),
-            '/carla_example_ego_vehicle.launch.py']),
+            '/carla_spawn_objects.launch.py']),
         launch_arguments={
-            'host': host,
-            'port': port,
-            'timeout': timeout,
-            'role_name': role_name,
-            'vehicle_filter': vehicle_filter,
-            'sensor_definition_file': os.path.join(
-                get_package_share_directory('mike_av_stack_sensor_fusion'),'configs','sensor.json'),
-            'spawn_point': spawn_point
+            'objects_definition_file': os.path.join(
+                get_package_share_directory('mike_av_stack_sensor_fusion'),'configs','objects.json')
             }.items()
         )
     rviz = Node(
         package='rviz2',
         executable='rviz2',
         name='rviz2',
-        arguments=['-d', os.path.join(get_package_share_directory('carla_ros_bridge'), 'config','carla_default_rviz.cfg.rviz')]
+        arguments=['-d', os.path.join(get_package_share_directory('mike_av_stack_sensor_fusion'), 'configs','config.rviz')]
     )
    
     return LaunchDescription([

@@ -34,7 +34,7 @@ class SFTest(Node):
         )
         self.subscriber_pc = self.create_subscription(
             msg_type=PointCloud2,
-            topic="/carla/ego_vehicle/lidar/lidar1", 
+            topic="/carla/ego_vehicle/lidar1", 
             callback=self.detection_callback,
             qos_profile=qos_profile,
             callback_group=sub_cb_group
