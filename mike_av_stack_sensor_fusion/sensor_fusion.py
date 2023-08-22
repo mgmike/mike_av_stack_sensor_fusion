@@ -78,22 +78,26 @@ def main(args=None):
     executor = MultiThreadedExecutor()
 
     # Create list of Sensors
-    # sensors = {sensor.id : get_sensor(sensor, trackmanager, executor=executor) for sensor in sensors_j.sensors}
+    sensors = {sensor.id : get_sensor(sensor, None, executor=executor) for sensor in sensors_j.sensors}
+    logger = None
+    if logger is None and len(sensors) > 0:
+        logger = sensors[0].get_logger()
 
-    node1 = SFTest()
+    # node1 = SFTest()
 
-    executor.add_node(node1)
+    # executor.add_node(node1)
 
     # spin() simply keeps python from exiting until this node is stopped
     # executor_thread = threading.Thread(target=executor.spin, daemon=True)
     # executor_thread.start()
     
     try:
-        node1.get_logger().info('Beginning client, shut down with CTRL-C')
+        logger.info('Beginning client, shut down with CTRL-C')
         executor.spin()
     except KeyboardInterrupt:
-        node1.get_logger().info('Keyboard interrupt, shutting down.\n')
-    node1.destroy_node()
+        logger.info('Keyboard interrupt, shutting down.\n')
+    for sensor in sensors:
+        sensor.destroy_node()
     rclpy.shutdown()
 
     

@@ -106,15 +106,16 @@ class Lidar(Sensor):
             qos_profile=qos_profile,
             callback_group=sub_cb_group
             )
-        self.subscriber_det = self.create_subscription(
-            msg_type=Detection3DArray,
-            topic="/sensor_fusion/detection/lidar/", 
-            callback=self.track_manage_callback,
-            qos_profile=qos_profile,
-            callback_group=sub_cb_group
-            )
+        if trackmanager == None:
+            self.subscriber_det = self.create_subscription(
+                msg_type=Detection3DArray,
+                topic="/sensor_fusion/detection/lidar/", 
+                callback=self.track_manage_callback,
+                qos_profile=qos_profile,
+                callback_group=sub_cb_group
+                )
+            self.subscriber_det
         self.subscriber_pc
-        self.subscriber_det
         
     def detection_callback(self, point_cloud):
         if self.verbose:
