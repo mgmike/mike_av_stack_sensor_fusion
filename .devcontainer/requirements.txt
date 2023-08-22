@@ -1,0 +1,11 @@
+easydict==1.10
+torchvision==0.13.0
+opencv-python==4.7.0.72
+numpy==1.23.5
+pyzmq==24.0.1
+packaging==21.3
+setuptools==60.2.0
+setuptools-scm==7.1.0
+jupyter_client==7.4.9
+jupyter_core==5.3.1
+open3d==0.13.0
