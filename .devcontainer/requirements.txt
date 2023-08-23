@@ -1,5 +1,6 @@
 easydict==1.10
-torchvision==0.13.0
+torch==2.0.1
+torchvision==0.15.0
 opencv-python==4.7.0.72
 numpy==1.23.5
 pyzmq==24.0.1

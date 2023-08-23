@@ -81,7 +81,9 @@ def main(args=None):
     sensors = {sensor.id : get_sensor(sensor, None, executor=executor) for sensor in sensors_j.sensors}
     logger = None
     if logger is None and len(sensors) > 0:
-        logger = sensors[0].get_logger()
+        for sensor in sensors:
+            if sensor is Lidar or sensor is Camera:
+                logger = sensor.get_logger()
 
     # node1 = SFTest()
 
@@ -92,10 +94,14 @@ def main(args=None):
     # executor_thread.start()
     
     try:
-        logger.info('Beginning client, shut down with CTRL-C')
+        print('Beginning client, shut down with CTRL-C')
+        if logger is not None:
+            logger.info('Beginning client, shut down with CTRL-C')
         executor.spin()
     except KeyboardInterrupt:
-        logger.info('Keyboard interrupt, shutting down.\n')
+        print('Keyboard interrupt, shutting down.\n')
+        if logger is not None:
+            logger.info('Keyboard interrupt, shutting down.\n')
     for sensor in sensors:
         sensor.destroy_node()
     rclpy.shutdown()

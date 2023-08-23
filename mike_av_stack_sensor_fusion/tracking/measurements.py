@@ -77,13 +77,13 @@ class Lidar(Sensor):
         super().__init__(name, configs, trackmanager)
 
         self.configs.update(odet.load_configs())
-        self.model = odet.create_model(self.configs)
+        self.model = odet.create_model(self, self.configs)
         self.configs.fov = [-np.pi/2, np.pi/2] # angle of field of view in radians
         self.configs.dim_meas = 3
 
         # Set up transforms
         self.sens_to_veh = np.matrix(np.identity((4))) # transformation sensor to vehicle coordinates equals identity matrix because lidar detections are already in vehicle coordinates
-        print(type(self.sens_to_veh))
+        self.get_logger().debug(f'Type: {type(self.sens_to_veh)}')
         self.veh_to_sens = np.linalg.inv(self.sens_to_veh) # transformation vehicle to sensor coordinates
 
         self.pub_detection = self.create_publisher(
@@ -99,17 +99,19 @@ class Lidar(Sensor):
             history=QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
             depth=1
         )
+        self.get_logger().info(f'Starting subscription of topic {self.configs.base_topic}')
         self.subscriber_pc = self.create_subscription(
             msg_type=PointCloud2,
-            topic="/carla/ego_vehicle/lidar1/", 
+            topic=self.configs.base_topic, 
             callback=self.detection_callback,
             qos_profile=qos_profile,
             callback_group=sub_cb_group
             )
+        self.get_logger().info(f'Starting subscription of topic /sensor_fusion/detection/lidar')
         if trackmanager == None:
             self.subscriber_det = self.create_subscription(
                 msg_type=Detection3DArray,
-                topic="/sensor_fusion/detection/lidar/", 
+                topic="/sensor_fusion/detection/lidar", 
                 callback=self.track_manage_callback,
                 qos_profile=qos_profile,
                 callback_group=sub_cb_group
@@ -122,12 +124,15 @@ class Lidar(Sensor):
             self.get_logger().info('Got pointcloud')
 
         point_cloud_2d = self.get_point_cloud_2d(point_cloud)
+        self.get_logger().debug('got point cloud 2d')
 
-        bev = pcl.bev_from_pcl(point_cloud_2d, self.configs)
-        detections = odet.detect_objects(bev, self.model, self.configs)
+        bev = pcl.bev_from_pcl(self, point_cloud_2d, self.configs)
+        self.get_logger().debug('got bev')
+        detections = odet.detect_objects(self, bev, self.model, self.configs, verbose=True)
+        self.get_logger().debug('got detections')
 
         if self.verbose:
-            print(len(detections))
+            self.get_logger().debug(f'detection size: {len(detections)}')
 
         dets = []
         for det in detections:
@@ -158,11 +163,11 @@ class Lidar(Sensor):
         point_cloud_2d = np.array([np.array(x.tolist()) for x in pointcloud2_to_array(pointcloud)])
     
         if self.verbose:
-            print("Shape of pc2d: ", point_cloud_2d.shape, " First element: ", type(point_cloud_2d[0]), point_cloud_2d[0])
-            print("First og: ", pointcloud.data[0], ", ", pointcloud.data[1], ", ", pointcloud.data[2], ", ", pointcloud.data[3])
-            print("height: %d, width: %d, length of data: %d" % (pointcloud.height, pointcloud.width, field_len))
+            self.get_logger().debug(f'Shape of pc2d: {point_cloud_2d.shape} First element: {type(point_cloud_2d[0])} {point_cloud_2d[0]}')
+            self.get_logger().debug(f'First og: {pointcloud.data[0]}, {pointcloud.data[1]}, {pointcloud.data[2]}. {pointcloud.data[3]}')
+            self.get_logger().debug('height: %d, width: %d, length of data: %d' % (pointcloud.height, pointcloud.width, field_len))
             for field in pointcloud.fields:
-                print("\tname: ", field.name, "offset: ", field.offset, "datatype: ", field.datatype, "count: ", field.count)
+                self.get_logger().debug(f'\tname: {field.name}, offset: {field.offset}, datatype: {field.datatype}, count: {field.count}')
 
         # TODO: Will need to transform to vehicle coordinate system
 
@@ -262,7 +267,7 @@ class Camera(Sensor):
 
         self.pub_detection = self.create_publisher(
             Detection2DArray,
-            "/sensor_fusion/detection/camera/" + self.configs.id,
+            "/sensor_fusion/detection/camera" + self.configs.id,
             10
             )
         
@@ -273,7 +278,7 @@ class Camera(Sensor):
 
     def detection_callback(self, image):
         # self.yolo.detect(image)
-        print("detection")
+        self.get_logger().debug("detection")
 
     def track_manage_callback(self, detection2DArray):        
         meas_list = []

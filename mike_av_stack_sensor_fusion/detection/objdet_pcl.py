@@ -5,9 +5,9 @@ import cv2
 import torch
 import open3d as o3d
 
-def show_bev(bev_maps, configs):
+def show_bev(node, bev_maps, configs):
 
-    print(bev_maps.shape)
+    node.get_logger().info('bev_maps shape: {bev_maps.shape}')
     bev_map = (bev_maps.cpu().data.squeeze().permute(1, 2, 0).numpy() * 255).astype(np.uint8)
     bev_map = cv2.resize(bev_map, (configs.bev_width, configs.bev_height))
     bev_map = cv2.rotate(bev_map, cv2.ROTATE_180)
@@ -19,9 +19,6 @@ def show_bev(bev_maps, configs):
 # visualize lidar point-cloud
 def show_pcl(pcl):
 
-    ####### ID_S1_EX2 START #######     
-    #######
-    print("student task ID_S1_EX2")
     pcl = pcl[:,:3]
 
     # step 1 : initialize open3d with key callback and create window
@@ -52,12 +49,10 @@ def show_pcl(pcl):
 
     vis.register_key_callback(262, callback)
     vis.run()
-
-    #######
-    ####### ID_S1_EX2 END #######     
+    
 
 # create birds-eye view of lidar data
-def bev_from_pcl(lidar_pcl, configs, viz=False, verbose=False):
+def bev_from_pcl(node, lidar_pcl, configs, viz=False, verbose=False):
 
     # remove lidar points outside detection area and with too low reflectivity
     mask = np.where((lidar_pcl[:, 0] >= configs.lim_x[0]) & (lidar_pcl[:, 0] <= configs.lim_x[1]) &
@@ -69,14 +64,10 @@ def bev_from_pcl(lidar_pcl, configs, viz=False, verbose=False):
     lidar_pcl[:, 2] = lidar_pcl[:, 2] - configs.lim_z[0]  
 
     if verbose:
-        print(lidar_pcl[0,:])
-        print("Min and max height, %f, %f" %(np.min(lidar_pcl[:,2]), np.max(lidar_pcl[:,2])))
+        node.get_logger().debug(lidar_pcl[0,:])
+        node.get_logger().debug('Min and max height, %f, %f' %(np.min(lidar_pcl[:,2]), np.max(lidar_pcl[:,2])))
 
     # convert sensor coordinates to bev-map coordinates (center is bottom-middle)
-    ####### ID_S2_EX1 START #######     
-    #######
-    if verbose:
-        print("student task ID_S2_EX1")
 
     ## step 1 : compute bev-map discretization by dividing x-range by the bev-image height (see configs)
     delta_x_rw_meters = configs.lim_x[1] - configs.lim_x[0]
@@ -92,18 +83,11 @@ def bev_from_pcl(lidar_pcl, configs, viz=False, verbose=False):
     lidar_pcl_copy[:, 1] = np.int_(np.floor(lidar_pcl_copy[:, 1] / meters_pixel_y) + (configs.bev_width + 1) / 2)
 
     # step 4 : visualize point-cloud using the function show_pcl from a previous task
-    if viz:
-        show_pcl(lidar_pcl_copy)
-    
-    #######
-    ####### ID_S2_EX1 END #######     
-    
-    
+    # if viz:
+    #     show_pcl(lidar_pcl_copy)
+   
+   
     # Compute intensity layer of the BEV map
-    ####### ID_S2_EX2 START #######     
-    #######
-    if verbose:
-        print("student task ID_S2_EX2")
 
     ## step 1 : create a numpy array filled with zeros which has the same dimensions as the BEV map
     intensity_map = np.zeros((configs.bev_height + 1, configs.bev_width + 1))
@@ -141,10 +125,10 @@ def bev_from_pcl(lidar_pcl, configs, viz=False, verbose=False):
         pbot = np.percentile(lidar_pcl_top_copy, 10)
         ptop = np.percentile(lidar_pcl_top_copy, 90)
         span = ptop - pbot
-        print(minv, maxv)
-        print('span: %f, mean: %f, standard deviation: %f' %(span, mean, std))
-        print('percentile, 90: %f, 10: %f' %(ptop, pbot))
-        print('lower std: %f, upper std: %f' %(min, max))
+        node.get_logger().debug('minv: {minv}, maxv: {maxv}')
+        node.get_logger().debug('span: %f, mean: %f, standard deviation: %f' %(span, mean, std))
+        node.get_logger().debug('percentile, 90: %f, 10: %f' %(ptop, pbot))
+        node.get_logger().debug('lower std: %f, upper std: %f' %(min, max))
 
     # scale_log = np.frompyfunc(lambda x: 0 if x == 1 else -1 / np.log10(x))
 
@@ -169,15 +153,9 @@ def bev_from_pcl(lidar_pcl, configs, viz=False, verbose=False):
                 break
         cv2.destroyAllWindows
 
-    #######
-    ####### ID_S2_EX2 END ####### 
-
+   
 
     # Compute height layer of the BEV map
-    ####### ID_S2_EX3 START #######     
-    #######
-    if verbose:
-        print("student task ID_S2_EX3")
 
     ## step 1 : create a numpy array filled with zeros which has the same dimensions as the BEV map
     height_map = np.zeros((configs.bev_height + 1, configs.bev_width + 1))

@@ -66,7 +66,7 @@ def generate_launch_description():
         package='rviz2',
         executable='rviz2',
         name='rviz2',
-        arguments=['-d', os.path.join(get_package_share_directory('mike_av_stack_sensor_fusion'), 'configs','config.rviz')]
+        arguments=['-d', [os.path.join(get_package_share_directory('mike_av_stack_sensor_fusion'), 'configs','config.rviz')]]
     )
    
     return LaunchDescription([

@@ -30,7 +30,9 @@
     "runArgs": [
         "--net=host",
         "-v", "/dev/shm:/dev/shm",
-        "-e", "DISPLAY=${env:DISPLAY}"
+        "-e", "DISPLAY=${env:DISPLAY}", 
+        "-e", "NVIDIA_VISIBLE_DEVICES=all",
+        "--runtime=nvidia"
     ],
     "mounts": [
        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",

@@ -35,32 +35,36 @@ from objdet_models.fpn_resnet.utils.evaluation_utils import decode, post_process
 from objdet_models.fpn_resnet.utils.torch_utils import _sigmoid
 import objdet_models.fpn_resnet.models.fpn_resnet as fpn_resnet
 
+
+from ament_index_python.packages import get_package_share_directory
+
 # from tools.objdet_models.darknet.models.darknet2pytorch import Darknet as darknet
 # from tools.objdet_models.darknet.utils.evaluation_utils import post_processing_v2
 
+package_name = 'mike_av_stack_sensor_fusion'
 
 # load all object-detection parameters into an edict
 def load_configs(model_name='fpn_resnet'):
     # get parent directory of this file to enable relative paths
     curr_path = os.path.dirname(os.path.realpath(__file__))
-    parent_path = os.path.abspath(os.path.join(curr_path, os.pardir))  
+    share_path = get_package_share_directory(package_name=package_name)
     
     configs = edict()
 
-    with open(os.path.join(parent_path, "configs", "bev.json")) as bevj_object:
+    with open(os.path.join(share_path, "configs", "bev.json")) as bevj_object:
         configs.update(json.load(bevj_object))
 
-    print(configs)
+    # print(configs)
 
-    with open(os.path.join(parent_path, "configs", model_name + ".json")) as mj_object:
+    with open(os.path.join(share_path, "configs", model_name + ".json")) as mj_object:
         configs.update(json.load(mj_object))
     configs.model_path = os.path.join(curr_path, 'objdet_models', model_name)
-    configs.pretrained_filename = os.path.join(configs.model_path, 'pretrained', configs.pretrained_filename)
+    configs.pretrained_path = os.path.join(share_path, 'weights', configs.pretrained_filename)
     if 'cfgfile' in configs.values():
         configs.cfgfile = os.path.join(configs.model_path, 'config', configs.cfgfile)
 
 
-    with open(os.path.join(parent_path, "configs", "tracking.json")) as mj_object:
+    with open(os.path.join(share_path, "configs", "tracking.json")) as mj_object:
         configs.update(json.load(mj_object))
 
     # visualization parameters
@@ -78,10 +82,11 @@ def load_configs(model_name='fpn_resnet'):
 
 
 # create model according to selected model type
-def create_model(configs):
+def create_model(node, configs):
 
     # check for availability of model file
     # assert os.path.isfile(configs.pretrained_filename), "No file at {}".format(configs.pretrained_filename)
+    #                               pretrained_path?
 
     # create model depending on architecture name
     # if (configs.arch == 'darknet') and (configs.cfgfile is not None):
@@ -89,23 +94,16 @@ def create_model(configs):
         # model = darknet(cfgfile=configs.cfgfile, use_giou_loss=configs.use_giou_loss)    
     
     if 'fpn_resnet' in configs.arch:
-        print('using ResNet architecture with feature pyramid')
-        
-        ####### ID_S3_EX1-4 START #######     
-        #######
-        print("student task ID_S3_EX1-4")
+        node.get_logger().info('using ResNet architecture with feature pyramid')
         model = fpn_resnet.get_pose_net(num_layers=configs.num_layers, heads=configs.heads, head_conv=configs.head_conv,
                                         imagenet_pretrained=configs.imagenet_pretrained)
 
-        #######
-        ####### ID_S3_EX1-4 END #######     
-    
     else:
         assert False, 'Undefined model backbone'
 
     # load model weights
-    model.load_state_dict(torch.load(configs.pretrained_filename, map_location='cpu'))
-    print('Loaded weights from {}\n'.format(configs.pretrained_filename))
+    model.load_state_dict(torch.load(configs.pretrained_path, map_location='cpu'))
+    node.get_logger().info('Loaded weights from {}\n'.format(configs.pretrained_path))
 
     # set model to evaluation state
     configs.device = torch.device('cpu' if configs.no_cuda else 'cuda:{}'.format(configs.gpu_idx))
@@ -137,12 +135,12 @@ def extract_3d_bb(det, configs, cls_id = 1):
         return [cls_id, x, y, z, _h, w, l, _yaw]
 
 # detect trained objects in birds-eye view
-def detect_objects(input_bev_maps, model, configs, verbose=False):
+def detect_objects(node, input_bev_maps, model, configs, verbose=False):
 
     
     # Extract 3d bounding boxes from model response
     if verbose:
-        print("student task ID_S3_EX2")
+        node.get_logger().debug("student task ID_S3_EX2")
     objects = [] 
 
     # deactivate autograd engine during test to reduce memory usage and speed up computations
@@ -171,16 +169,12 @@ def detect_objects(input_bev_maps, model, configs, verbose=False):
         #         if len(obj) > 0:
         #             objects.append(obj)
 
+        node.get_logger().debug(f'Inside torch, arch: {configs.arch}')    
+
         if 'fpn_resnet' in configs.arch:
             # decode output and perform post-processing
             
-            ####### ID_S3_EX1-5 START #######     
-            #######
-            if verbose:
-                print("student task ID_S3_EX1-5")
-
             # perform post-processing
-
             t1 = time_synchronized()
             outputs = model(input_bev_maps)
             outputs['hm_cen'] = _sigmoid(outputs['hm_cen'])
@@ -193,12 +187,9 @@ def detect_objects(input_bev_maps, model, configs, verbose=False):
             t2 = time_synchronized() 
 
             detections = detections[0]
-            #######
-            ####### ID_S3_EX1-5 END #######     
-
-            ####### ID_S3_EX2 START #######     
-            #######
             
+            if verbose:
+                node.get_logger().debug(f'detections: {detections}')            
             ## detections contains an array of length 3 where 0 pertains to pidestrians, 1 is vehicles and 2 is cyclests. 
             ## Each array can contain a list of detections
 
