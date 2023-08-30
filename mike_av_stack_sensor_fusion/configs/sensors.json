@@ -105,7 +105,7 @@
         {
             "type": "sensor.lidar.ray_cast",
             "id": "lidar1",
-            "base_topic": "/carla/ego_vehicle/lidar1",
+            "base_topic": "/carla/ego_vehicle/lidar1/point_cloud_full",
             "x": 0.0, "y": 0.0, "z": 2.4, "roll": 0.0, "pitch": 0.0, "yaw": 0.0,
             "range": 50,
             "channels": 64,

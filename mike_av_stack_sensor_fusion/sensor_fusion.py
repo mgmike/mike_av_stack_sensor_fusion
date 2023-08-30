@@ -81,7 +81,7 @@ def main(args=None):
     sensors = {sensor.id : get_sensor(sensor, None, executor=executor) for sensor in sensors_j.sensors}
     logger = None
     if logger is None and len(sensors) > 0:
-        for sensor in sensors:
+        for sensor in sensors.values():
             if sensor is Lidar or sensor is Camera:
                 logger = sensor.get_logger()
 
@@ -102,9 +102,12 @@ def main(args=None):
         print('Keyboard interrupt, shutting down.\n')
         if logger is not None:
             logger.info('Keyboard interrupt, shutting down.\n')
-    for sensor in sensors:
-        sensor.destroy_node()
+    for sensor in sensors.values():
+        print(f'sensor {sensor}')
+        if sensor is Lidar or sensor is Camera:
+            sensor.destroy_node()
     rclpy.shutdown()
+    return
 
     
 if __name__ == '__main__':

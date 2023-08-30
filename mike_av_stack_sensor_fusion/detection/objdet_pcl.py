@@ -13,7 +13,7 @@ def show_bev(node, bev_maps, configs):
     bev_map = cv2.rotate(bev_map, cv2.ROTATE_180)
     cv2.imshow('BEV map', bev_map)
       
-    cv2.waitKey(0) 
+    cv2.waitKey(16) 
     
 
 # visualize lidar point-cloud
