@@ -28,7 +28,7 @@ COPY  . .
 # USER $USERNAME
 
 RUN sudo apt-get install -y ros-foxy-vision-msgs ros-foxy-derived-object-msgs python3-opencv
-RUN pip install -r requirements.txt
+# RUN pip install -r .devcontainer/requirements.txt
 
 WORKDIR /home/ws_av_sf/
 

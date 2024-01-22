@@ -29,9 +29,11 @@
     },
     "runArgs": [
         "--net=host",
+        "-p", "8888:8888",
         "-v", "/dev/shm:/dev/shm",
         "-e", "DISPLAY=${env:DISPLAY}", 
         "-e", "NVIDIA_VISIBLE_DEVICES=all",
+        "-it",
         "--runtime=nvidia"
     ],
     "mounts": [
