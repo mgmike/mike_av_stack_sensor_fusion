@@ -1,0 +1,13 @@
+{
+    "weights":"yolov8m.pt",
+    "save_txt":true,
+    "img_size":640,
+    "no_trace":true,
+    "device":"0",
+    "augment":true,
+    "classes":"0,1,2,3,6,8,10",
+    "save_conf":true,
+    "conf_thres":0.25,
+    "iou_thres":0.45,
+    "agnostic_nms":true
+}

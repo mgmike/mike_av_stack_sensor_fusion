@@ -37,12 +37,15 @@ dir_tracking = os.path.dirname(os.path.realpath(__file__))
 dir_sf = os.path.dirname(dir_tracking)
 dir_scripts = os.path.dirname(dir_sf)
 sys.path.append(dir_scripts)
-from tools.ros_conversions.transformations import quaternion_from_euler
+from tools.ros_conversions.transformations import quaternion_from_euler, pointcloud2_to_array, image_to_numpy
 from ros2_numpy.ros2_numpy.point_cloud2 import pointcloud2_to_array
+from ros2_numpy.ros2_numpy.image import image_to_numpy
 import cv2
 import json
 import torch
 import open3d as o3d
+
+from ultralytics import YOLO
 
 
 class Sensor(Node):
@@ -392,10 +395,11 @@ class Camera(Sensor):
         super().__init__(name, configs, trackmanager)
 
         # Add yolo configs
-        # with open(os.path.join(dir_sf, 'configs', 'yolov7.json')) as j_object:
-        #     configs.yolov7 = json.load(j_object)
+        with open(os.path.join(dir_sf, 'configs', 'yolov8.json')) as j_object:
+            configs.yolov7 = json.load(j_object)
 
         # self.init_yolo()
+        self.model = odet.create_model(self, self.configs)
 
         sub_cb_group = ReentrantCallbackGroup()
         qos_profile = QoSProfile(
@@ -443,6 +447,10 @@ class Camera(Sensor):
     def detection_callback(self, image):
         # self.yolo.detect(image)
         self.get_logger().debug("detection")
+        image_np = image_to_numpy(image)
+        outputs = self.model(image_np)
+        self.get_logger().debug("Outputs: ", outputs)
+        
 
     def track_manage_callback(self, detection2DArray):        
         meas_list = []

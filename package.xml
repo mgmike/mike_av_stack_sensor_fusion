@@ -2,14 +2,13 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>mike_av_stack_sensor_fusion</name>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <description>Michael's autonomous vehicle stack built on top of carla ros bridge</description>
   <maintainer email="mgmike1023@aol.com">mike</maintainer>
   <license>Apache License 2.0</license>
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-  <exec_depend>vision_msgs</exec_depend>
   <exec_depend>ros2launch</exec_depend>
 
   <test_depend>ament_copyright</test_depend>

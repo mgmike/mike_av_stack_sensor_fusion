@@ -1,4 +1,3 @@
-#!/home/mike/anaconda3/envs/waymo/bin/python3
 
 import rclpy
 from rclpy.node import Node
@@ -7,7 +6,12 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 import threading
 import os
+
+import sys
+print(sys.path)
+
 import json
+print(json.__file__)
 from easydict import EasyDict as edict
 
 from sensor_msgs.msg import Image, PointCloud2

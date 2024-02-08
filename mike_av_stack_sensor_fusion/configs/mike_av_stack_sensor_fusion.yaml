@@ -1,0 +1,477 @@
+mike_av_stack_sensor_fusion:
+  sensors:
+  - type: sensor.camera.rgb
+    id: front
+    base_topic: "/carla/ego_vehicle/camera/rgb/front/image_color"
+    x: 2
+    y: 0
+    z: 2
+    roll: 0
+    pitch: 0
+    yaw: 0
+    width: 800
+    height: 600
+    fov: 90
+    sensor_tick: 0.05
+    gamma: 3.5
+    shutter_speed: 200
+    iso: 200
+    fstop: 8
+    min_fstop: 1.2
+    blade_count: 5
+    exposure_mode: manual
+    exposure_compensation: -2.2
+    exposure_min_bright: 0.1
+    exposure_max_bright: 2
+    exposure_speed_up: 3
+    exposure_speed_down: 1
+    calibration_constant: 16
+    focal_distance: 1000
+    blur_amount: 1
+    blur_radius: 0
+    motion_blur_intensity: 0.45
+    motion_blur_max_distortion: 0.35
+    motion_blur_min_object_screen_size: 0.1
+    slope: 0.88
+    toe: 0.55
+    shoulder: 0.26
+    black_clip: 0
+    white_clip: 0.04
+    temp: 6500
+    tint: 0
+    chromatic_aberration_intensity: 0
+    chromatic_aberration_offset: 0
+    enable_postprocess_effects: 'True'
+    lens_circle_falloff: 5
+    lens_circle_multiplier: 0
+    lens_k: -1
+    lens_kcube: 0
+    lens_x_size: 0.08
+    lens_y_size: 0.08
+    bloom_intensity: 0.675
+    lens_flare_intensity: 0.1
+    intrinsic:
+    - 2083.091212133254
+    - 2083.091212133254
+    - 957.2938286685071
+    - 650.5697927719348
+    - 0.04067236637270731
+    - -0.3374271466716414
+    - 0.0016273829099200004
+    - -0.0007879327563938157
+    - 0
+    extrinsic:
+      transform:
+      - 0.9999151800844592
+      - -0.008280529275085654
+      - -0.010053132426658727
+      - 1.5444145042510942
+      - 0.008380895965622895
+      - 0.9999150476776223
+      - 0.009982885888937929
+      - -0.022877347388980857
+      - 0.009969614810858722
+      - -0.010066293398396434
+      - 0.9998996332221252
+      - 2.115953541712884
+      - 0
+      - 0
+      - 0
+      - 1
+  - type: sensor.camera.rgb
+    id: view
+    base_topic: "/carla/ego_vehicle/camera/rgb/view/image_color"
+    x: -4.5
+    y: 0
+    z: 2.8
+    roll: 0
+    pitch: -20
+    yaw: 0
+    width: 800
+    height: 600
+    fov: 90
+    sensor_tick: 0.05
+    gamma: 2.2
+    shutter_speed: 200
+    iso: 200
+    fstop: 8
+    min_fstop: 1.2
+    blade_count: 5
+    exposure_mode: manual
+    exposure_compensation: -2.2
+    exposure_min_bright: 0.1
+    exposure_max_bright: 2
+    exposure_speed_up: 3
+    exposure_speed_down: 1
+    calibration_constant: 16
+    focal_distance: 1000
+    blur_amount: 1
+    blur_radius: 0
+    motion_blur_intensity: 0.45
+    motion_blur_max_distortion: 0.35
+    motion_blur_min_object_screen_size: 0.1
+    slope: 0.88
+    toe: 0.55
+    shoulder: 0.26
+    black_clip: 0
+    white_clip: 0.04
+    temp: 6500
+    tint: 0
+    chromatic_aberration_intensity: 0
+    chromatic_aberration_offset: 0
+    enable_postprocess_effects: 'True'
+    lens_circle_falloff: 5
+    lens_circle_multiplier: 0
+    lens_k: -1
+    lens_kcube: 0
+    lens_x_size: 0.08
+    lens_y_size: 0.08
+    bloom_intensity: 0.675
+    lens_flare_intensity: 0.1
+    intrinsic:
+    - 2083.091212133254
+    - 2083.091212133254
+    - 957.2938286685071
+    - 650.5697927719348
+    - 0.04067236637270731
+    - -0.3374271466716414
+    - 0.0016273829099200004
+    - -0.0007879327563938157
+    - 0
+    extrinsic:
+      transform:
+      - 0.9999151800844592
+      - -0.008280529275085654
+      - -0.010053132426658727
+      - 1.5444145042510942
+      - 0.008380895965622895
+      - 0.9999150476776223
+      - 0.009982885888937929
+      - -0.022877347388980857
+      - 0.009969614810858722
+      - -0.010066293398396434
+      - 0.9998996332221252
+      - 2.115953541712884
+      - 0
+      - 0
+      - 0
+      - 1
+  - type: sensor.lidar.ray_cast
+    id: lidar1
+    base_topic: "/carla/ego_vehicle/lidar1/point_cloud_full"
+    x: 0
+    y: 0
+    z: 2.4
+    roll: 0
+    pitch: 0
+    yaw: 0
+    range: 50
+    channels: 64
+    points_per_second: 320000
+    upper_fov: 2
+    lower_fov: -26.8
+    rotation_frequency: 20
+    sensor_tick: 0.05
+  - type: sensor.other.radar
+    id: front
+    base_topic: "/carla/ego_vehicle/radar/front/radar"
+    x: 2
+    y: 0
+    z: 1.5
+    roll: 0
+    pitch: 0
+    yaw: 0
+    horizontal_fov: 30
+    vertical_fov: 10
+    points_per_second: 1500
+    range: 100
+  - type: sensor.other.gnss
+    id: gnss1
+    base_topic: "/carla/ego_vehicle/gnss/gnss1/fix"
+    x: 1
+    y: 0
+    z: 2
+    noise_alt_stddev: 0
+    noise_lat_stddev: 0
+    noise_lon_stddev: 0
+    noise_alt_bias: 0
+    noise_lat_bias: 0
+    noise_lon_bias: 0
+  - type: sensor.other.imu
+    id: imu1
+    base_topic: "/carla/ego_vehicle/imu/imu1"
+    x: 2
+    y: 0
+    z: 2
+    roll: 0
+    pitch: 0
+    yaw: 0
+    noise_accel_stddev_x: 0
+    noise_accel_stddev_y: 0
+    noise_accel_stddev_z: 0
+    noise_gyro_stddev_x: 0
+    noise_gyro_stddev_y: 0
+    noise_gyro_stddev_z: 0
+    noise_gyro_bias_x: 0
+    noise_gyro_bias_y: 0
+    noise_gyro_bias_z: 0
+  - type: sensor.other.collision
+    id: collision1
+    x: 0
+    y: 0
+    z: 0
+  - type: sensor.other.lane_invasion
+    id: laneinvasion1
+    x: 0
+    y: 0
+    z: 0
+  bev:
+    lim_x:
+    - 0
+    - 50
+    lim_y:
+    - -25
+    - 25
+    lim_z:
+    - -3.1
+    - 2
+    lim_r:
+    - 0
+    - 1
+    bev_width: 608
+    bev_height: 608
+  darknet:
+    arch: darknet
+    pretrained_filename: complex_yolov4_mse_loss.pth
+    cfgfile: config/complex_yolov4.cfg
+    batch_size: 4
+    conf_thresh: 0.5
+    num_classes: 3
+    distributed: false
+    img_size: 608
+    nms_thresh: 0.4
+    num_workers: 4
+    pin_memory: true
+    use_giou_loss: false
+  fpn_resnet:
+    arch: fpn_resnet
+    pretrained_filename: fpn_resnet_18_epoch_300.pth
+    imagenet_pretrained: true
+    num_layers: 18
+    batch_size: 4
+    K: 50
+    conf_thresh: 0.5
+    peak_thresh: 0.2
+    distributed: true
+    img_size: 608
+    nms_thresh: 0.4
+    num_workers: 1
+    pin_memory: true
+    input_size:
+    - 608
+    - 608
+    hm_size:
+    - 152
+    - 152
+    down_ratio: 4
+    max_objects: 50
+    head_conv: 64
+    num_classes: 3
+    num_center_offset: 2
+    num_z: 1
+    num_dim: 3
+    num_direction: 2
+    heads:
+      hm_cen: 3
+      cen_offset: 2
+      direction: 2
+      z_coor: 1
+      dim: 3
+    num_input_features: 4
+  objects:
+  - type: sensor.pseudo.traffic_lights
+    id: traffic_lights
+  - type: sensor.pseudo.objects
+    id: objects
+  - type: sensor.pseudo.actor_list
+    id: actor_list
+  - type: sensor.pseudo.markers
+    id: markers
+  - type: sensor.pseudo.opendrive_map
+    id: map
+  - type: vehicle.audi.etron
+    id: ego_vehicle
+    spawn_point:
+      x: 65.516594
+      y: 7.808423
+      z: 0.275307
+      roll: 0
+      pitch: 0
+      yaw: 0.855823
+    sensors:
+    - type: sensor.camera.rgb
+      id: rgb_front
+      spawn_point:
+        x: 2
+        y: 0
+        z: 2
+        roll: 0
+        pitch: 0
+        yaw: 0
+      image_size_x: 800
+      image_size_y: 600
+      fov: 90
+    - type: sensor.camera.rgb
+      id: rgb_view
+      spawn_point:
+        x: -4.5
+        y: 0
+        z: 2.8
+        roll: 0
+        pitch: 20
+        yaw: 0
+      image_size_x: 800
+      image_size_y: 600
+      fov: 90
+      attached_objects:
+      - type: actor.pseudo.control
+        id: control
+    - type: sensor.lidar.ray_cast
+      id: lidar1
+      spawn_point:
+        x: 0
+        y: 0
+        z: 2.4
+        roll: 0
+        pitch: 0
+        yaw: 0
+      range: 50
+      channels: 32
+      points_per_second: 320000
+      upper_fov: 2
+      lower_fov: -26.8
+      rotation_frequency: 20
+      noise_stddev: 0
+    - type: sensor.lidar.ray_cast_semantic
+      id: semantic_lidar
+      spawn_point:
+        x: 0
+        y: 0
+        z: 2.4
+        roll: 0
+        pitch: 0
+        yaw: 0
+      range: 50
+      channels: 32
+      points_per_second: 320000
+      upper_fov: 2
+      lower_fov: -26.8
+      rotation_frequency: 20
+    - type: sensor.other.radar
+      id: radar_front
+      spawn_point:
+        x: 2
+        y: 0
+        z: 2
+        roll: 0
+        pitch: 0
+        yaw: 0
+      horizontal_fov: 30
+      vertical_fov: 10
+      points_per_second: 1500
+      range: 100
+    - type: sensor.camera.semantic_segmentation
+      id: semantic_segmentation_front
+      spawn_point:
+        x: 2
+        y: 0
+        z: 2
+        roll: 0
+        pitch: 0
+        yaw: 0
+      fov: 90
+      image_size_x: 400
+      image_size_y: 70
+    - type: sensor.camera.depth
+      id: depth_front
+      spawn_point:
+        x: 2
+        y: 0
+        z: 2
+        roll: 0
+        pitch: 0
+        yaw: 0
+      fov: 90
+      image_size_x: 400
+      image_size_y: 70
+    - type: sensor.camera.dvs
+      id: dvs_front
+      spawn_point:
+        x: 2
+        y: 0
+        z: 2
+        roll: 0
+        pitch: 0
+        yaw: 0
+      fov: 90
+      image_size_x: 400
+      image_size_y: 70
+      positive_threshold: 0.3
+      negative_threshold: 0.3
+      sigma_positive_threshold: 0
+      sigma_negative_threshold: 0
+      use_log: true
+      log_eps: 0.001
+    - type: sensor.other.gnss
+      id: gnss
+      spawn_point:
+        x: 1
+        y: 0
+        z: 2
+      noise_alt_stddev: 0
+      noise_lat_stddev: 0
+      noise_lon_stddev: 0
+      noise_alt_bias: 0
+      noise_lat_bias: 0
+      noise_lon_bias: 0
+    - type: sensor.other.imu
+      id: imu
+      spawn_point:
+        x: 2
+        y: 0
+        z: 2
+        roll: 0
+        pitch: 0
+        yaw: 0
+      noise_accel_stddev_x: 0
+      noise_accel_stddev_y: 0
+      noise_accel_stddev_z: 0
+      noise_gyro_stddev_x: 0
+      noise_gyro_stddev_y: 0
+      noise_gyro_stddev_z: 0
+      noise_gyro_bias_x: 0
+      noise_gyro_bias_y: 0
+      noise_gyro_bias_z: 0
+    - type: sensor.other.collision
+      id: collision
+      spawn_point:
+        x: 0
+        y: 0
+        z: 0
+    - type: sensor.other.lane_invasion
+      id: lane_invasion
+      spawn_point:
+        x: 0
+        y: 0
+        z: 0
+    - type: sensor.pseudo.tf
+      id: tf
+    - type: sensor.pseudo.objects
+      id: objects
+    - type: sensor.pseudo.odom
+      id: odometry
+    - type: sensor.pseudo.speedometer
+      id: speedometer
+    - type: actor.pseudo.control
+      id: control
+

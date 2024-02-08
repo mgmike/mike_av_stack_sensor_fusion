@@ -31,15 +31,10 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 # model-related
-from objdet_models.fpn_resnet.utils.evaluation_utils import decode, post_processing 
-from objdet_models.fpn_resnet.utils.torch_utils import _sigmoid
-import objdet_models.fpn_resnet.models.fpn_resnet as fpn_resnet
-
 
 from ament_index_python.packages import get_package_share_directory
 
-# from tools.objdet_models.darknet.models.darknet2pytorch import Darknet as darknet
-# from tools.objdet_models.darknet.utils.evaluation_utils import post_processing_v2
+from ultralytics import YOLO
 
 package_name = 'mike_av_stack_sensor_fusion'
 
@@ -95,8 +90,11 @@ def create_model(node, configs):
     
     if 'fpn_resnet' in configs.arch:
         node.get_logger().info('using ResNet architecture with feature pyramid')
-        model = fpn_resnet.get_pose_net(num_layers=configs.num_layers, heads=configs.heads, head_conv=configs.head_conv,
-                                        imagenet_pretrained=configs.imagenet_pretrained)
+        # model = fpn_resnet.get_pose_net(num_layers=configs.num_layers, heads=configs.heads, head_conv=configs.head_conv,
+        #                                 imagenet_pretrained=configs.imagenet_pretrained)
+    elif 'yolov8' in configs.arch:
+        model = YOLO('objdet_models/yolov8/pretrained/yolov8m.pt')
+
 
     else:
         assert False, 'Undefined model backbone'
@@ -177,13 +175,14 @@ def detect_objects(node, input_bev_maps, model, configs, verbose=False):
             # perform post-processing
             t1 = time_synchronized()
             outputs = model(input_bev_maps)
-            outputs['hm_cen'] = _sigmoid(outputs['hm_cen'])
-            outputs['cen_offset'] = _sigmoid(outputs['cen_offset'])
+            print(outputs)
+            # outputs['hm_cen'] = _sigmoid(outputs['hm_cen'])
+            # outputs['cen_offset'] = _sigmoid(outputs['cen_offset'])
             # detections size (batch_size, K, 10)
-            detections = decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'],
-                                outputs['dim'], K=configs.K)
-            detections = detections.cpu().numpy().astype(np.float32)
-            detections = post_processing(detections, configs)
+            # detections = decode(outputs['hm_cen'], outputs['cen_offset'], outputs['direction'], outputs['z_coor'],
+            #                     outputs['dim'], K=configs.K)
+            # detections = detections.cpu().numpy().astype(np.float32)
+            # detections = post_processing(detections, configs)
             t2 = time_synchronized() 
 
             detections = detections[0]
@@ -202,6 +201,9 @@ def detect_objects(node, input_bev_maps, model, configs, verbose=False):
                         obj = extract_3d_bb(det, configs)
                         if len(obj) > 0:
                             objects.append(obj)
+
+        if 'yolov8' in configs.arch:
+            node.get_logger().debug(f'predicting')          
  
     show_objects_in_bev_labels_in_camera(objects, input_bev_maps, configs)
     return objects    
