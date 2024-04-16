@@ -1,5 +1,6 @@
-FROM osrf/ros:humble-desktop
+FROM osrf/ros:foxy-desktop
 
+ENV ROS_DISTRO=foxy
 
 # ********************************************************
 # * Anything else you want to do like clean up goes here *
@@ -23,7 +24,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 # Install packges for project
 RUN apt-get update -q && \
-    apt-get install -y ros-humble-vision-msgs ros-humble-derived-object-msgs ros-humble-ament-cmake-nose python3-pip
+    apt-get install -y ros-${ROS_DISTRO}-vision-msgs ros-${ROS_DISTRO}-derived-object-msgs ros-${ROS_DISTRO}-ament-cmake-nose python3-pip python3-tk
 # COPY requirements.txt .
 # RUN pip install -r requirements.txt
 

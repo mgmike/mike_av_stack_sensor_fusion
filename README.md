@@ -82,7 +82,7 @@ Once inside, run the following:
 ```sh
 $ cd ../../
 $ pip install -r src/mike_av_stack_sensor_fusion/.devcontainer/requirements.txt
-$ source /opt/ros/humble/setup.bash
+$ source /opt/ros/foxy/setup.bash
 $ colcon build --packages-select mike_av_stack_sensor_fusion
 $ source install/setup.bash
 ```
