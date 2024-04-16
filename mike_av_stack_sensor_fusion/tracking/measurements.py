@@ -131,6 +131,10 @@ class Lidar(Sensor):
         detections = odet.detect_objects(self, bev, self.model, self.configs, verbose=True)
         self.get_logger().debug('got detections')
 
+        if detections is None:
+            self.get_logger().warn(f'No detections')
+            return
+            
         if self.verbose:
             self.get_logger().debug(f'detection size: {len(detections)}')
 

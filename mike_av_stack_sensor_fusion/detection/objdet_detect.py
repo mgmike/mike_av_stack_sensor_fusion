@@ -1,17 +1,5 @@
 #!/home/mike/anaconda3/envs/waymo/bin/python3
 
-# ---------------------------------------------------------------------
-# Project "Track 3D-Objects Over Time"
-# Copyright (C) 2020, Dr. Antje Muntzinger / Dr. Andreas Haja.
-#
-# Purpose of this file : Detect 3D objects in lidar point clouds using deep learning
-#
-# You should have received a copy of the Udacity license together with this program.
-#
-# https://www.udacity.com/course/self-driving-car-engineer-nanodegree--nd013
-# ----------------------------------------------------------------------
-#
-
 # general package imports
 import numpy as np
 import torch
@@ -188,6 +176,13 @@ def detect_objects(node, input_bev_maps, model, configs, verbose=False):
             
             # perform post-processing
             t1 = time_synchronized()
+            
+            if input_bev_maps is None:
+                node.get_logger().warn(f'bev is empty')
+                return
+            if model is None:
+                node.get_logger().warn(f'model is empty')
+                return
             outputs = model(input_bev_maps)
             print(outputs)
             # outputs['hm_cen'] = _sigmoid(outputs['hm_cen'])
