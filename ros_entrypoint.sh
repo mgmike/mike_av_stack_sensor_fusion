@@ -23,6 +23,7 @@ if [[ $(id -u) -eq 0 ]]; then
 
 	# create_user
 	if [[ ! -e /home/${DEFAULT_USER} ]]; then
+		groupadd -g "${DEFAULT_USER_GID}" "${DEFAULT_USER}"
 		useradd --create-home --home-dir /home/${DEFAULT_USER} --uid ${DEFAULT_USER_UID} --shell /bin/bash \
 		    --gid ${DEFAULT_USER_GID} --groups sudo ${DEFAULT_USER}
 		echo "${DEFAULT_USER}:${DEFAULT_USER}" | chpasswd && \

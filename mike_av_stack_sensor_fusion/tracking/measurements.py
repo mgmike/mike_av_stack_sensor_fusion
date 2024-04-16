@@ -1,16 +1,3 @@
-
-# ---------------------------------------------------------------------
-# Project "Track 3D-Objects Over Time"
-# Copyright (C) 2020, Dr. Antje Muntzinger / Dr. Andreas Haja.
-#
-# Purpose of this file : Classes for sensor and measurement 
-#
-# You should have received a copy of the Udacity license together with this program.
-#
-# https://www.udacity.com/course/self-driving-car-engineer-nanodegree--nd013
-# ----------------------------------------------------------------------
-#
-
 # imports
 import numpy as np
 import rclpy
@@ -40,6 +27,7 @@ sys.path.append(dir_scripts)
 from tools.ros_conversions.transformations import quaternion_from_euler, pointcloud2_to_array, image_to_numpy
 from ros2_numpy.ros2_numpy.point_cloud2 import pointcloud2_to_array
 from ros2_numpy.ros2_numpy.image import image_to_numpy
+from ament_index_python.packages import get_package_share_directory
 import cv2
 import json
 import torch
@@ -47,6 +35,7 @@ import open3d as o3d
 
 from ultralytics import YOLO
 
+package_name = 'mike_av_stack_sensor_fusion'
 
 class Sensor(Node):
     '''Sensor class including measurement matrix'''
@@ -56,7 +45,9 @@ class Sensor(Node):
         self.configs = configs
         self.name = name
         self.trackmanager = trackmanager
+        self.get_logger().debug(f'Starting Sensor: {self.configs.id} of type: {self.configs.type}')
 
+        self.share_path = get_package_share_directory(package_name=package_name)
         self.frame_id = 0
 
     def detection_callback(self):
@@ -395,11 +386,11 @@ class Camera(Sensor):
         super().__init__(name, configs, trackmanager)
 
         # Add yolo configs
-        with open(os.path.join(dir_sf, 'configs', 'yolov8.json')) as j_object:
-            configs.yolov7 = json.load(j_object)
-
+        print('Share path: ', self.share_path)
+        with open(os.path.join(self.share_path, 'configs', 'yolov8.json')) as j_object:
+            configs.yolov8 = json.load(j_object)
         # self.init_yolo()
-        self.model = odet.create_model(self, self.configs)
+        self.model = odet.create_model(self, self.configs, self.share_path)
 
         sub_cb_group = ReentrantCallbackGroup()
         qos_profile = QoSProfile(

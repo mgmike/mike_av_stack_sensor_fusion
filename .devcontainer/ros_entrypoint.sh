@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# DEFAULT_USER=${DEFAULT_USER:-'ubuntu'}
+# DEFAULT_USER=${DEFAULT_USER:-'ws_av_sf'}
 # DEFAULT_USER_UID=${USER_UID:-'1000'}
 # DEFAULT_USER_GID=${USER_GID:-'1000'}
 NOPASSWD=${NOPASSWD:-''} # set 'NOPASSWD:' to disable asking sudo password
@@ -23,6 +23,7 @@ if [[ $(id -u) -eq 0 ]]; then
 
 	# create_user
 	if [[ ! -e /home/${DEFAULT_USER} ]]; then
+		groupadd -g "${DEFAULT_USER_GID}" "${DEFAULT_USER}"
 		useradd --create-home --home-dir /home/${DEFAULT_USER} --uid ${DEFAULT_USER_UID} --shell /bin/bash \
 		    --gid ${DEFAULT_USER_GID} --groups sudo ${DEFAULT_USER}
 		echo "${DEFAULT_USER}:${DEFAULT_USER}" | chpasswd && \

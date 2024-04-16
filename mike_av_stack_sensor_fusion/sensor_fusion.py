@@ -8,10 +8,8 @@ import threading
 import os
 
 import sys
-print(sys.path)
 
 import json
-print(json.__file__)
 from easydict import EasyDict as edict
 
 from sensor_msgs.msg import Image, PointCloud2
@@ -61,11 +59,7 @@ def get_sensor(sensor, trackmanager, executor):
     return result
 
 def main(args=None):
-    
-    curr_path = os.path.dirname(os.path.realpath(__file__))
-    parent_path = os.path.abspath(os.path.join(curr_path, os.pardir))
     share_path = get_package_share_directory(package_name=package_name)
-    print("current path: ", curr_path)  
     print("share path: ", share_path)
 
     sensors_j = edict()

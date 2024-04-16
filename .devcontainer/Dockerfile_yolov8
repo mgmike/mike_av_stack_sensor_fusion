@@ -8,6 +8,15 @@ RUN gcc -Wall /usr/local/bin/su-exec.c -o/usr/local/bin/su-exec
 RUN chown root:root /usr/local/bin/su-exec
 RUN chmod 0755 /usr/local/bin/su-exec
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    gnupg2 \
+    lsb-release \
+    sudo \
+    software-properties-common \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
 FROM ultralytics/ultralytics:latest
 LABEL maintainer="Daisuke Sato <tiryoh@gmail.com>"
 RUN apt-get update -q && \

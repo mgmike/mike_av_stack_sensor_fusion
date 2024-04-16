@@ -40,44 +40,58 @@ package_name = 'mike_av_stack_sensor_fusion'
 
 # load all object-detection parameters into an edict
 def load_configs(model_name='fpn_resnet'):
-    # get parent directory of this file to enable relative paths
-    curr_path = os.path.dirname(os.path.realpath(__file__))
     share_path = get_package_share_directory(package_name=package_name)
-    
     configs = edict()
 
-    with open(os.path.join(share_path, "configs", "bev.json")) as bevj_object:
-        configs.update(json.load(bevj_object))
+    if model_name == 'fpn_resnet':
+        # get parent directory of this file to enable relative paths
 
-    # print(configs)
+        with open(os.path.join(share_path, "configs", "bev.json")) as bevj_object:
+            configs.update(json.load(bevj_object))
 
-    with open(os.path.join(share_path, "configs", model_name + ".json")) as mj_object:
-        configs.update(json.load(mj_object))
-    configs.model_path = os.path.join(curr_path, 'objdet_models', model_name)
-    configs.pretrained_path = os.path.join(share_path, 'weights', configs.pretrained_filename)
-    if 'cfgfile' in configs.values():
-        configs.cfgfile = os.path.join(configs.model_path, 'config', configs.cfgfile)
+        # print(configs)
+
+        with open(os.path.join(share_path, "configs", model_name + ".json")) as mj_object:
+            configs.update(json.load(mj_object))
+        configs.model_path = os.path.join(share_path, 'objdet_models', model_name)
+        configs.pretrained_path = os.path.join(share_path, 'objdet_models', 'fpn_resnet', 'pretrained', configs.pretrained_filename)
+        if 'cfgfile' in configs.values():
+            configs.cfgfile = os.path.join(configs.model_path, 'config', configs.cfgfile)
 
 
-    with open(os.path.join(share_path, "configs", "tracking.json")) as mj_object:
-        configs.update(json.load(mj_object))
+        with open(os.path.join(share_path, "configs", "tracking.json")) as mj_object:
+            configs.update(json.load(mj_object))
 
-    # visualization parameters
-    configs.output_width = 608 # width of result image (height may vary)
-    configs.obj_colors = [[0, 255, 255], [0, 0, 255], [255, 0, 0]] # 'Pedestrian': 0, 'Car': 1, 'Cyclist': 2
-    # GPU vs. CPU
-    configs.no_cuda = False # if true, cuda is not used
-    configs.gpu_idx = 0  # GPU index to use.
-    configs.device = torch.device('cpu' if configs.no_cuda else 'cuda:{}'.format(configs.gpu_idx))
-    
-    # Evaluation params
-    configs.min_iou = 0.5
+        # visualization parameters
+        configs.output_width = 608 # width of result image (height may vary)
+        configs.obj_colors = [[0, 255, 255], [0, 0, 255], [255, 0, 0]] # 'Pedestrian': 0, 'Car': 1, 'Cyclist': 2
+        # GPU vs. CPU
+        configs.no_cuda = False # if true, cuda is not used
+        configs.gpu_idx = 0  # GPU index to use.
+        configs.device = torch.device('cpu' if configs.no_cuda else 'cuda:{}'.format(configs.gpu_idx))
+        
+        # Evaluation params
+        configs.min_iou = 0.5
+
+    elif model_name == 'yolov8':
+        with open(os.path.join(share_path, "configs", model_name + ".json")) as mj_object:
+            configs.update(json.load(mj_object))
+        # visualization parameters
+        configs.output_width = 608 # width of result image (height may vary)
+        configs.obj_colors = [[0, 255, 255], [0, 0, 255], [255, 0, 0]] # 'Pedestrian': 0, 'Car': 1, 'Cyclist': 2
+        # GPU vs. CPU
+        configs.no_cuda = False # if true, cuda is not used
+        configs.gpu_idx = 0  # GPU index to use.
+        configs.device = torch.device('cpu' if configs.no_cuda else 'cuda:{}'.format(configs.gpu_idx))
+        
+        # Evaluation params
+        configs.min_iou = 0.5
 
     return configs
 
 
 # create model according to selected model type
-def create_model(node, configs):
+def create_model(node, configs, share_path=None):
 
     # check for availability of model file
     # assert os.path.isfile(configs.pretrained_filename), "No file at {}".format(configs.pretrained_filename)
@@ -88,28 +102,28 @@ def create_model(node, configs):
     #     print('Darknet not implemented yet')
         # model = darknet(cfgfile=configs.cfgfile, use_giou_loss=configs.use_giou_loss)    
     
-    if 'fpn_resnet' in configs.arch:
+    if 'fpn_resnet_past' in configs.arch:
         node.get_logger().info('using ResNet architecture with feature pyramid')
         # model = fpn_resnet.get_pose_net(num_layers=configs.num_layers, heads=configs.heads, head_conv=configs.head_conv,
         #                                 imagenet_pretrained=configs.imagenet_pretrained)
-    elif 'yolov8' in configs.arch:
-        model = YOLO('objdet_models/yolov8/pretrained/yolov8m.pt')
+        # load model weights
+        model.load_state_dict(torch.load(configs.pretrained_path, map_location='cpu'))
+        node.get_logger().info('Loaded weights from {}\n'.format(configs.pretrained_path))
 
+        # set model to evaluation state
+        configs.device = torch.device('cpu' if configs.no_cuda else 'cuda:{}'.format(configs.gpu_idx))
+        model = model.to(device=configs.device)  # load model to either cpu or gpu
+        out_cap = None
+        model.eval()     
+        return model 
+    elif 'yolov8' in configs.arch:
+        if share_path is not None:
+            model = YOLO(os.path.join(share_path, 'objdet_models', 'yolov8', 'pretrained', 'yolov8m.pt'))
+        return model
 
     else:
-        assert False, 'Undefined model backbone'
-
-    # load model weights
-    model.load_state_dict(torch.load(configs.pretrained_path, map_location='cpu'))
-    node.get_logger().info('Loaded weights from {}\n'.format(configs.pretrained_path))
-
-    # set model to evaluation state
-    configs.device = torch.device('cpu' if configs.no_cuda else 'cuda:{}'.format(configs.gpu_idx))
-    model = model.to(device=configs.device)  # load model to either cpu or gpu
-    out_cap = None
-    model.eval()          
-
-    return model
+        node.get_logger().warn('Undefined model backbone')
+    
 
 def time_synchronized():
     torch.cuda.synchronize() if torch.cuda.is_available() else None

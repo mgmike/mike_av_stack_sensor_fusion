@@ -1,0 +1,119 @@
+FROM ultralytics/ultralytics:8.0.237 as builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# # Install language
+# RUN apt-get update && apt-get install -y \
+#   locales \
+#   && locale-gen en_US.UTF-8 \
+#   && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
+#   && rm -rf /var/lib/apt/lists/*
+# ENV LANG en_US.UTF-8
+
+# # Install timezone
+# RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime \
+#   && export DEBIAN_FRONTEND=noninteractive \
+#   && apt-get update \
+#   && apt-get install -y tzdata \
+#   && dpkg-reconfigure --frontend noninteractive tzdata \
+#   && rm -rf /var/lib/apt/lists/*
+
+# RUN apt-get update && apt-get -y upgrade \
+#     && rm -rf /var/lib/apt/lists/*
+
+# Install common programs
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    gnupg2 \
+    lsb-release \
+    sudo \
+    software-properties-common \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install ROS2
+RUN sudo add-apt-repository universe 
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg 
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-foxy-ros-base \
+    python3-argcomplete \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV ROS_DISTRO=foxy
+ENV AMENT_PREFIX_PATH=/opt/ros/foxy
+ENV COLCON_PREFIX_PATH=/opt/ros/foxy
+ENV LD_LIBRARY_PATH=/opt/ros/foxy/lib
+ENV PATH=/opt/ros/foxy/bin:$PATH
+ENV PYTHONPATH=/opt/ros/foxy/lib/python3.8/site-packages
+ENV ROS_PYTHON_VERSION=3
+ENV ROS_VERSION=2
+
+###########################################
+#  Develop image 
+###########################################
+FROM builder AS dev
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  bash-completion \
+  build-essential \
+  cmake \
+  gdb \
+  git \
+  openssh-client \
+  python3-argcomplete \
+  python3-pip \
+  ros-dev-tools \
+  vim \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN rosdep init || echo "rosdep already initialized"
+
+
+# ********************************************************
+# * Anything else you want to do like clean up goes here *
+# ********************************************************
+
+# Set up user as root
+ARG USERNAME=ws_av_sf
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+# RUN echo 'root:root' | chpasswd
+
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && usermod -aG sudo $USERNAME \
+    #
+    # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
+    && apt-get update \
+    && apt-get install -y sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
+
+
+# Set up autocompletion for user
+RUN apt-get update && apt-get install -y git-core bash-completion \
+  && echo "if [ -f /opt/ros/${ROS_DISTRO}/setup.bash ]; then source /opt/ros/${ROS_DISTRO}/setup.bash; fi" >> /home/$USERNAME/.bashrc \
+  && echo "if [ -f /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]; then source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash; fi" >> /home/$USERNAME/.bashrc \
+  && rm -rf /var/lib/apt/lists/* 
+
+ENV DEBIAN_FRONTEND=
+ENV AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS=1
+
+# Install packges for project
+RUN sudo apt-get install -y ros-foxy-vision-msgs ros-foxy-derived-object-msgs ros-foxy-ament-cmake-nose
+# COPY requirements.txt .
+# RUN pip install -r requirements.txt
+
+# Copy code over
+WORKDIR /home/ws_av_sf/src/mike_av_stack_sensor_fusion/
+COPY  . .
+
+# WORKDIR /home/ws_av_sf/src/
+# RUN git clone --branch foxy-devel https://github.com/Box-Robotics/ros2_numpy.git
+
+WORKDIR /home/ws_av_sf/
+
+CMD ["/bin/bash"]
+

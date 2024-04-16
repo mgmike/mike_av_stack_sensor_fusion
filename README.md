@@ -63,7 +63,7 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/user-gu
 
 ```sh
 $ docker build . -t ws_av_sf -f .devcontainer/Dockerfile
-$ docker run -it -p 8888:8888 -v ./:/home/ws_av_sf -v /dev/shm:/dev/shm -e DISPLAY=0 -e NVIDIA_VISIBLE_DEVICES=all --runtime=nvidia --env="DISPLAY" --gpus all ws_av_sf
+$ docker run -it -p 8888:8888 -v ./:/home/ws_av_sf/ros2_ws/src/mike_av_stack_sensor_fusion -v /dev/shm:/dev/shm -e DISPLAY=0 -e NVIDIA_VISIBLE_DEVICES=all --runtime=nvidia --env="DISPLAY" --gpus all ws_av_sf
 ```
 
 #### With VScode
@@ -82,7 +82,7 @@ Once inside, run the following:
 ```sh
 $ cd ../../
 $ pip install -r src/mike_av_stack_sensor_fusion/.devcontainer/requirements.txt
-$ source /opt/ros/foxy/setup.bash
+$ source /opt/ros/humble/setup.bash
 $ colcon build --packages-select mike_av_stack_sensor_fusion
 $ source install/setup.bash
 ```
