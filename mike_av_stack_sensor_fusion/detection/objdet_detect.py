@@ -26,6 +26,13 @@ from ultralytics import YOLO
 
 package_name = 'mike_av_stack_sensor_fusion'
 
+colors_map={2:(0,255,0), 0:(0,0,255), 1:(100,100,0)}
+def colors(cls):
+    if int(cls) in colors_map:
+        return colors_map[cls]
+    else:
+        return (255,0,0)
+
 # load all object-detection parameters into an edict
 def load_configs(model_name='fpn_resnet'):
     share_path = get_package_share_directory(package_name=package_name)
@@ -280,3 +287,28 @@ def show_objects_in_bev_labels_in_camera(detections, bev_maps, configs):
     cv2.imshow('labels vs. detected objects', ret_img_bev)
 
     cv2.waitKey(16) 
+    
+def showImg(img):
+    cv2.imshow('Camera and detected objects', img)
+    cv2.waitKey(16) 
+
+def addBoxes(results):
+    for result in results:
+        boxes = result.boxes
+        probs = result.probs
+        img = result.orig_img
+        classes = boxes.cls.cpu().numpy()
+        names = result.names
+        # print(boxes, ', prob:')
+        for i, xyxy in enumerate(boxes.xyxy.cpu().numpy()):
+            # print(xyxy[0])
+            cls = classes[i]
+
+            if int(cls) in colors_map:
+                color = colors_map[cls]
+                cv2.rectangle(img, (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])), thickness=2, color=color)
+                cv2.putText(img, names[int(cls)], (int(xyxy[0]), int(xyxy[1]) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color=color, thickness=2)
+            
+    cv2.imshow('Camera and detected objects', img)
+    cv2.waitKey(0) 
+    return img

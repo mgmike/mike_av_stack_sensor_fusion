@@ -13,7 +13,9 @@ from geometry_msgs.msg import Pose, Point, Vector3, Quaternion
 # from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from ..detection import objdet_pcl as pcl
 from ..detection import objdet_detect as odet
-# from ..detection.objdet_models.yolov7.yolov7 import Yolov7
+
+from cv_bridge import CvBridge
+
 import numpy as np
 import time
 from tracking.trackmanagement import Measurement, LidarMeasurement, CameraMeasurement
@@ -395,6 +397,7 @@ class Camera(Sensor):
             configs.yolov8 = json.load(j_object)
         # self.init_yolo()
         self.model = odet.create_model(self, self.configs, self.share_path)
+        self.br = CvBridge()
 
         sub_cb_group = ReentrantCallbackGroup()
         qos_profile = QoSProfile(
@@ -402,6 +405,7 @@ class Camera(Sensor):
             history=QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
             depth=1
         )
+        self.get_logger().info(f'Creating camera subscription of topic {self.configs.base_topic}')
         self.subscription_det = self.create_subscription(
             msg_type=Image,
             topic=self.configs.base_topic, 
@@ -440,11 +444,21 @@ class Camera(Sensor):
 
 
     def detection_callback(self, image):
-        # self.yolo.detect(image)
-        self.get_logger().debug("detection")
-        image_np = image_to_numpy(image)
-        outputs = self.model(image_np)
-        self.get_logger().debug("Outputs: ", outputs)
+        if image is None:
+            self.get_logger().warn("No image received")
+            return
+        
+        image_matBGRA = self.br.imgmsg_to_cv2(image, desired_encoding='passthrough')
+        image_mat = np.zeros([480, 640, 3])
+        image_mat = cv2.cvtColor(image_matBGRA, cv2.COLOR_BGRA2BGR)
+        image_np = np.asarray(image_mat)
+        image_np = cv2.resize(image_to_numpy(image), (640, 480))[:,:,:3]
+        
+        self.get_logger().debug(f'Image received, size: {image_mat.shape}')
+        # odet.showImg(image_np)
+        outputs = self.model(image_mat, verbose=False)
+        results_boxes = odet.addBoxes(outputs)
+        # self.get_logger().debug(f'Outputs: {outputs}')
         
 
     def track_manage_callback(self, detection2DArray):        
