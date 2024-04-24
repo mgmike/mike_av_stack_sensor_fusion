@@ -42,12 +42,12 @@ package_name = 'mike_av_stack_sensor_fusion'
 class Sensor(Node):
     '''Sensor class including measurement matrix'''
     def __init__(self, name, configs, trackmanager):
-        super().__init__('sensor_fusion')
+        super().__init__(f'{package_name}_{name}')
         self.verbose = True
         self.configs = configs
         self.name = name
         self.trackmanager = trackmanager
-        self.get_logger().debug(f'Starting Sensor: {self.configs.id} of type: {self.configs.type}')
+        self.get_logger().info(f'Starting Sensor: {self.configs.id} of type: {self.configs.type}')
 
         self.share_path = get_package_share_directory(package_name=package_name)
         self.frame_id = 0
@@ -71,7 +71,7 @@ class Sensor(Node):
 
 class Lidar(Sensor):
     def __init__(self, name, configs, trackmanager):
-        super().__init__(name, configs, trackmanager)
+        super().__init__(f'lidar_{configs.id}', configs, trackmanager)
 
         self.configs.update(odet.load_configs())
         self.model = odet.create_model(self, self.configs)
@@ -84,10 +84,9 @@ class Lidar(Sensor):
         self.sens_to_veh = np.matrix(np.identity((4))) # transformation sensor to vehicle coordinates equals identity matrix because lidar detections are already in vehicle coordinates
         self.get_logger().debug(f'Type: {type(self.sens_to_veh)}')
         self.veh_to_sens = np.linalg.inv(self.sens_to_veh) # transformation vehicle to sensor coordinates
-
         self.pub_detection = self.create_publisher(
             Detection3DArray, 
-            "/sensor_fusion/detection/lidar/" + self.name,
+            f'{package_name}/lidar/' + self.name,
             10
             )
 
@@ -389,7 +388,7 @@ class Lidar(Sensor):
 
 class Camera(Sensor):
     def __init__(self, name, configs, trackmanager):
-        super().__init__(name, configs, trackmanager)
+        super().__init__(f'camera_{configs.id}', configs, trackmanager)
 
         # Add yolo configs
         print('Share path: ', self.share_path)
@@ -415,6 +414,19 @@ class Camera(Sensor):
             )
         self.subscription_det
 
+        self.get_logger().info(f'Setting up publisher /sensor_fusion/detection/camera/{self.configs.id}')
+        self.pub_detection_cam = self.create_publisher(
+            Detection2DArray,
+            "/sensor_fusion/detection/camera/" + self.configs.id,
+            10
+            )
+        
+        #TEST
+        test = Detection2DArray()
+        test.header.stamp = self.get_clock().now().to_msg()
+        self.pub_detection_cam.publish(test)
+        
+        self.colors_map={2:(0,255,0), 0:(0,0,255), 1:(100,100,0)}
         self.configs.fov = [-0.35, 0.35] # angle of field of view in radians, inaccurate boundary region was removed
 
         self.configs.dim_meas = 2
@@ -431,12 +443,6 @@ class Camera(Sensor):
         self.c_j = calib.intrinsic[3] # principal point j-coordinate
 
         self.veh_to_sens = np.linalg.inv(self.sens_to_veh) # transformation vehicle to sensor coordinates
-
-        self.pub_detection = self.create_publisher(
-            Detection2DArray,
-            "/sensor_fusion/detection/camera" + self.configs.id,
-            10
-            )
         
     # def init_yolo(self):
     #     self.get_logger().info(f'Initializing Yolov7, cv version: {cv2.__version__}')
@@ -457,8 +463,50 @@ class Camera(Sensor):
         self.get_logger().debug(f'Image received, size: {image_mat.shape}')
         # odet.showImg(image_np)
         outputs = self.model(image_mat, verbose=False)
-        results_boxes = odet.addBoxes(outputs)
+        # results_boxes = odet.addBoxes(outputs, self)
         # self.get_logger().debug(f'Outputs: {outputs}')
+        
+        dets = []
+        for result in outputs:
+            boxes = result.boxes
+            probs = result.probs
+            img = result.orig_img
+            classes = boxes.cls.cpu().numpy()
+            names = result.names        
+            for i, xywh in enumerate(boxes.xywh.cpu().numpy()):
+                cls = int(classes[i])
+                
+                self.get_logger().debug(f'Classes: {cls}')
+                if cls in self.colors_map:
+                    detection = Detection2D()
+                    detection.header.stamp = self.get_clock().now().to_msg()
+                    hypothesis = ObjectHypothesisWithPose()
+                    hypothesis.id = f'{cls}: {names[cls]}'
+                    detection.results.append(hypothesis)
+                    detection.bbox.center.x = xywh[0] + xywh[2] / 2
+                    detection.bbox.center.y = xywh[1] + xywh[3] / 2
+                    detection.bbox.size_x = xywh[2] / 2
+                    detection.bbox.size_y = (xywh[3] / 2).astype(np.float64)
+                    # populate the first Detection2D in the list with the image.
+                    # if i == 0:
+                        # detection.source_img.header.stamp = self.get_clock().now().to_msg()
+                        # detection.source_img.height = image.height
+                        # detection.source_img.width = image.width
+                        # detection.source_img.encoding = image.encoding
+                        # detection.source_img.is_bigendian = image.is_bigendian
+                        # detection.source_img.step = image.step
+                        # detection.source_img.data = image.data
+                    dets.append(detection)
+
+        # self.frame_id += 1
+        detection2DArray = Detection2DArray()
+        # detection3DArray.header.frame_id = self.frame_id 
+        detection2DArray.header.stamp = self.get_clock().now().to_msg() # rospy.Time.now()
+        # detection2DArray.header.seq = image.header.seq
+        detection2DArray.detections = dets
+        self.get_logger().info(f'Publishing, number of detections: {len(dets)}')
+        if len(dets) > 1:
+            self.pub_detection_cam.publish(detection2DArray)
         
 
     def track_manage_callback(self, detection2DArray):        
