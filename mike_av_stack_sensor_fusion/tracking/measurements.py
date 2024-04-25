@@ -472,8 +472,9 @@ class Camera(Sensor):
             probs = result.probs
             img = result.orig_img
             classes = boxes.cls.cpu().numpy()
-            names = result.names        
-            for i, xywh in enumerate(boxes.xywh.cpu().numpy()):
+            names = result.names
+            xywh = boxes.xywh.cpu().numpy()
+            for i, xywh in enumerate(xywh):
                 cls = int(classes[i])
                 
                 self.get_logger().debug(f'Classes: {cls}')
@@ -481,21 +482,21 @@ class Camera(Sensor):
                     detection = Detection2D()
                     detection.header.stamp = self.get_clock().now().to_msg()
                     hypothesis = ObjectHypothesisWithPose()
-                    hypothesis.id = f'{cls}: {names[cls]}'
+                    hypothesis.id = f'{cls}:{names[cls]}'
                     detection.results.append(hypothesis)
-                    detection.bbox.center.x = xywh[0] + xywh[2] / 2
-                    detection.bbox.center.y = xywh[1] + xywh[3] / 2
+                    detection.bbox.center.x = xywh[0].astype(np.float64)
+                    detection.bbox.center.y = xywh[1].astype(np.float64)
                     detection.bbox.size_x = xywh[2] / 2
                     detection.bbox.size_y = (xywh[3] / 2).astype(np.float64)
                     # populate the first Detection2D in the list with the image.
-                    # if i == 0:
-                        # detection.source_img.header.stamp = self.get_clock().now().to_msg()
-                        # detection.source_img.height = image.height
-                        # detection.source_img.width = image.width
-                        # detection.source_img.encoding = image.encoding
-                        # detection.source_img.is_bigendian = image.is_bigendian
-                        # detection.source_img.step = image.step
-                        # detection.source_img.data = image.data
+                    if i == 0:
+                        detection.source_img.header.stamp = self.get_clock().now().to_msg()
+                        detection.source_img.height = image.height
+                        detection.source_img.width = image.width
+                        detection.source_img.encoding = image.encoding
+                        detection.source_img.is_bigendian = image.is_bigendian
+                        detection.source_img.step = image.step
+                        detection.source_img.data = image.data
                     dets.append(detection)
 
         # self.frame_id += 1
