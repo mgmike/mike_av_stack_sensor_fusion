@@ -1,16 +1,9 @@
 # Mike AV Stack - Sensor Fusion
 
-## About the project
-
-The sensor fusion part of my av stack includes object detection from camera and lidar scanners. 
-
-The main algorithms such as tracking, Extended Kalman Filters, CNNs... are inspired heavily from the Udacity Self driving car nanodegree. I have changed the code significantly as I am adapting it to ros2 foxy inside a docker container. I have also made the detection asynchronous as the ros topics will produce messages at varying intervals. 
-
-
 ## Prerequisites
 
 Ubuntu 20.04\
-Mike av stack base
+[Mike av stack base](https://github.com/mgmike/mike_av_stack)
 
 ### Prerequisites: Local 
 ros2 foxy\
@@ -22,11 +15,9 @@ pytorch\
 ### Prerequisites: Docker
 Docker
 
-Make sure you have the correct drivers and docker versions for nvidia integration
-https://docs.nvidia.com/ai-enterprise/deployment-guide-vmware/0.1.0/docker.html
+Make sure you have the [correct drivers and docker versions for nvidia integration.](https://docs.nvidia.com/ai-enterprise/deployment-guide-vmware/0.1.0/docker.html)
 
-Add nvidia runtime
-https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/user-guide.html
+Add [nvidia runtime.](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/user-guide.html)
 
 ## Installation
 ### Installation: Local
@@ -109,6 +100,8 @@ Start mike av stack sensor fusion node
 ros2 run mike_av_stack_sensor_fusion sensor_fusion --ros-args --log-level debug
 ```
 
+## More info
+For demos and more info, resort to the [Mike av stack base wiki](https://github.com/mgmike/mike_av_stack)
 
 <!-- 
 The following may be needed in the next step: Uisng yolov8 instead of resnet
