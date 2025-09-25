@@ -52,7 +52,7 @@ def get_sensor(sensor, trackmanager, executor):
     result = None
     if name == 'lidar':
         result = Lidar(name, sensor, trackmanager)
-        # executor.add_node(result)
+        executor.add_node(result)
     elif name == 'camera':
         result = Camera(name, sensor, trackmanager)
         executor.add_node(result)

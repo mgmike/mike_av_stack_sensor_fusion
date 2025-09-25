@@ -5,9 +5,7 @@ import cv2
 import torch
 import open3d as o3d
 
-def show_bev(node, bev_maps, configs):
-
-    node.get_logger().info('bev_maps shape: {bev_maps.shape}')
+def show_bev(bev_maps, configs):
     bev_map = (bev_maps.cpu().data.squeeze().permute(1, 2, 0).numpy() * 255).astype(np.uint8)
     bev_map = cv2.resize(bev_map, (configs.bev_width, configs.bev_height))
     bev_map = cv2.rotate(bev_map, cv2.ROTATE_180)

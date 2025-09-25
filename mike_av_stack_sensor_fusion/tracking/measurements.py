@@ -11,7 +11,7 @@ from sensor_msgs.msg import Image, PointCloud2
 from vision_msgs.msg import BoundingBox3D, ObjectHypothesisWithPose, Detection3D, Detection3DArray, Detection2D, Detection2DArray
 from geometry_msgs.msg import Pose, Point, Vector3, Quaternion
 # from tf.transformations import quaternion_from_euler, euler_from_quaternion
-from ..detection import objdet_pcl as pcl
+from ..detection import objdet_pcl as opcl
 from ..detection import objdet_detect as odet
 
 from cv_bridge import CvBridge
@@ -343,7 +343,11 @@ class Lidar(Sensor):
         bev_maps = torch.from_numpy(bev_maps)  # create tensor from birds-eye view
         input_bev_maps = bev_maps.to(configs.device, non_blocking=True).float()
 
-        # show_bev(input_bev_maps, configs)
+
+        # if self.configs.viz:
+        
+        self.get_logger().debug(f'Displaying bev maps')
+        opcl.show_bev(input_bev_maps, configs)
 
         return input_bev_maps
 
