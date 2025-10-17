@@ -19,6 +19,8 @@ Make sure you have the [correct drivers and docker versions for nvidia integrati
 
 Add [nvidia runtime.](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/user-guide.html)
 
+[ros2_numpy](https://github.com/Box-Robotics/ros2_numpy.git) in the mike_av_stack_sensor_fusion directory
+
 ## Installation
 ### Installation: Local
 
